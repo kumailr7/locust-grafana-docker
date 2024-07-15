@@ -1,0 +1,19 @@
+# Ignore Python bytecode files
+*.pyc
+__pycache__
+
+# Ignore virtual environment directories
+venv/
+env/
+
+# Ignore IDE and editor specific files
+.vscode/
+
+# Ignore any logs or data files generated during testing
+*.log
+*.csv
+*.json
+
+# Ignore Grafana configuration files (if any)
+grafana.ini
+
