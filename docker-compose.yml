@@ -1,0 +1,66 @@
+######## DISTRIBUTED LOAD TESTING #########
+
+version: '3.8'
+
+
+services:
+  ####### Locust Service #########
+  locust:
+    image: locustio/locust
+    ports:
+        - "8089:8089"
+    volumes:
+        - ./load_tests.py:/mnt/locust/load_tests.py
+    command: -f /mnt/locust/load_tests.py --master 
+  
+  ####### Worker ########
+  worker:
+    image: locustio/locust
+    volumes:
+      - ./load_tests.py:/mnt/locust/load_tests.py
+    command: -f /mnt/locust/load_tests.py --worker --master-host locust
+    deploy:
+      replicas: 1 #### Add the number of Workers 
+
+  ######## Locust Exporter #########
+  locust-metrics-exporter:
+    image: containersol/locust_exporter
+    ports:
+        - "9646:9646"
+    environment:
+        - LOCUST_EXPORTER_URI=http://locust:8089
+    depends_on:
+        - locust
+  
+  ####### Prometheus Server ########
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+        - 9090:9090
+    command:
+        - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+        - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    network_mode: bridge 
+  
+  ######## Grafana Server #########
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports: 
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER}    #### Export the user 
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD} #### Export the Password
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    network_mode: bridge
+
+volumes:
+  grafana_data:

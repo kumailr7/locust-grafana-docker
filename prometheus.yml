@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    monitor: 'node'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhosts:9090']     #### Add your ip address 
+  - job_name: 'locust'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['localhosts:9646']    #### Add your ip address
