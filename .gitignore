@@ -5,7 +5,7 @@ __pycache__
 # Ignore virtual environment directories
 venv/
 env/
-
+.env
 # Ignore IDE and editor specific files
 .vscode/
 
